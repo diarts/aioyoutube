@@ -100,3 +100,27 @@ def comments_error_handler(coroutine):
         return json
 
     return wrapper
+
+
+def channels_error_handler(coroutine):
+    async def wrapper(*args, **kwargs):
+        """Decorator checker api channels response."""
+
+        json = await coroutine(*args, **kwargs)
+
+        if not json.get('items'):
+            channel_id = kwargs.get('channel_id')
+            user_name = kwargs.get('user_name')
+
+            if user_name:
+                raise InvalidUserName(mess=(
+                    f"Channel with user name {user_name} doesn't exist."
+                ))
+            elif channel_id:
+                raise ChannelNotExist(code=404, mess=(
+                    f"Channel with id {channel_id} doesn't exist."
+                ))
+
+        return json
+
+    return wrapper

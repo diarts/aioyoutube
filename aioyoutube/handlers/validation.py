@@ -168,3 +168,68 @@ def comments_validation(coroutine):
         return await coroutine(*args, **kwargs)
 
     return wrapper
+
+
+def channels_validation(coroutine):
+    async def wrapper(*args, **kwargs):
+        """Decorator validate passed parameters for api method getting
+            channels data."""
+        acceptable_part = (
+            'brandingSettings', 'contentDetails', 'contentOwnerDetails', 'id',
+            'localizations', 'snippet', 'statistics', 'status', 'topicDetails',
+        )
+
+        key = kwargs.get('key')
+        part = kwargs.get('part')
+        max_results = kwargs.get('max_results')
+        channel_id = kwargs.get('channel_id')
+        user_name = kwargs.get('user_name')
+
+        if key and not isinstance(key, str):
+            raise VariableTypeError(
+                f'Argument "key" must be an str, current type is {type(key)}.'
+            )
+        elif part and not isinstance(part, list):
+            raise VariableTypeError(
+                'Argument "part" must be an list, current type is'
+                f' {type(max_results)}.'
+            )
+        elif part and not all(isinstance(item, str) for item in part):
+            raise VariableTypeError(
+                'Argument "part" must contain only str, current type is'
+                f' {type(max_results)}.'
+            )
+        elif part and not all(item in acceptable_part for item in part):
+            raise VariableValueError(
+                'Acceptable values for part contain parameter is '
+                f'{acceptable_part}, current part contain {part}.'
+            )
+        elif max_results and not isinstance(max_results, int):
+            raise VariableTypeError(
+                'Argument "max_results" must be an int, current type is'
+                f' {type(max_results)}.'
+            )
+        elif max_results and not 0 <= max_results <= 50:
+            raise VariableValueError(
+                'Argument "max_result" must be in range from 1 to 50, '
+                f'current value is {max_results}.'
+            )
+        elif channel_id and user_name:
+            raise VariableValueError(
+                'Variable "channel_id" and "user_name" is not compatible, '
+                'pass only one of them.'
+            )
+        elif channel_id and not isinstance(channel_id, str):
+            raise VariableTypeError(
+                'Argument "channel_id" must be an str, current type'
+                f' is {type(channel_id)}.'
+            )
+        elif user_name and not isinstance(user_name, str):
+            raise VariableTypeError(
+                'Argument "user_name" must be an str, current type'
+                f' is {type(user_name)}.'
+            )
+
+        return await coroutine(*args, **kwargs)
+
+    return wrapper

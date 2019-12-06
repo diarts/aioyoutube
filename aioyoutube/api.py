@@ -7,6 +7,8 @@ from aioyoutube.handlers import (
     search_validation,
     comments_validation,
     comments_error_handler,
+    channels_validation,
+    channels_error_handler,
 )
 
 __all__ = [
@@ -158,5 +160,43 @@ class Api:
             params['searchTerms'] = search_text
         if page_token:
             params['pageToken'] = page_token
+
+        return await self._request(kwargs.get('name'), params=params)
+
+    @channels_validation
+    @response_error_handler
+    @channels_error_handler
+    @insert_name
+    async def channels(self, key: str, part: List[str], max_results: int = 50,
+                       channel_id: str = None, user_name: str = None,
+                       **kwargs) -> dict:
+        """Getting channel data.
+
+        Args:
+            key (str): Key of youtube application, for access to youtube api.
+            part (List[str]): Sections list which must contained in response.
+                Acceptable part sections: brandingSettings, contentDetails,
+                contentOwnerDetails, id, localizations, snippet, statistics,
+                status, topicDetails.
+            max_results (int, optional): Count of items in response.
+                Minimal value is 1, maximum value is 50. Default value is 50.
+
+            Acceptable and required only one identifier parameter at the
+                same time:
+            channel_id (str): Youtube channel id. Can take from
+                youtube url: ./channel/<user_id>.
+            user_name (str): Youtube channel owner. Can take from
+                youtube url: ./user/<user_name>.
+
+        """
+        params = {
+            'key': key,
+            'part': ','.join(part),
+            'maxResults': max_results,
+        }
+        if user_name:
+            params['forUsername'] = user_name
+        else:
+            params['id'] = channel_id
 
         return await self._request(kwargs.get('name'), params=params)
