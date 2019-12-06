@@ -11,6 +11,7 @@ from aioyoutube.handlers import (
     channels_error_handler,
     playlist_items_error_handler,
     playlist_items_validation,
+    playlists_validation,
 )
 
 __all__ = [
@@ -227,6 +228,38 @@ class Api:
             'key': key,
             'part': ','.join(part),
             'playlistId': playlist_id,
+            'maxResults': max_results,
+        }
+        if page_token:
+            params['pageToken'] = page_token
+
+        return await self._request(kwargs.get('name'), params=params)
+
+    @playlists_validation
+    @response_error_handler
+    @insert_name
+    async def playlists(self, key: str, part: List[str], channel_id: str,
+                        max_results: int = 50, page_token: str = None,
+                        **kwargs) -> dict:
+        """Getting channel playlists.
+
+        Args:
+            key (str): Key of youtube application, for access to youtube api.
+            part (List[str]): Sections list which must contained in response.
+                Acceptable part sections: contentDetails, id, snippet, status,
+                localizations, player.
+            channel_id (str): Youtube channel id. Can take from youtube
+                url: ./channel/<user_id>.
+            max_results (int, optional): Count of items in response.
+                Minimal value is 1, maximum value is 50. Default value is 50.
+            page_token (str, optional): Identifies a specific page in the
+                result set that should be returned.
+
+            """
+        params = {
+            'key': key,
+            'part': ','.join(part),
+            'channelId': channel_id,
             'maxResults': max_results,
         }
         if page_token:
