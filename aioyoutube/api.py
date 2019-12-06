@@ -1,9 +1,12 @@
 from aiohttp import ClientSession
+from typing import List
 
 from aioyoutube.helpers import insert_name, time_converting
 from aioyoutube.handlers import (
     response_error_handler,
     search_validation,
+    comments_validation,
+    comments_error_handler,
 )
 
 __all__ = [
@@ -110,3 +113,50 @@ class Api:
             params['publishedBefore'] = time_converting(published_before)
 
         return await self._request(kwargs.get('name'), params)
+
+    @comments_validation
+    @response_error_handler
+    @comments_error_handler
+    @insert_name
+    async def commentThreads(self, key: str, part: List[str], video_id: str,
+                             max_results: int = 100, order: str = 'time',
+                             text_format: str = 'plainText',
+                             page_token: str = None, search_text: str = None,
+                             **kwargs) -> dict:
+        """Getting comments for video.
+
+        Args:
+            key (str): Key of youtube application, for access to youtube api.
+            part (List[str]): Sections list which must contained in response.
+                Acceptable part sections: id, replies, snippet.
+            video_id (str): Id of youtube video.
+            max_results (int, optional): Count of items in response.
+                Minimal value is 1, maximum value is 100. Default value is 100.
+            page_token (str, optional): Identifies a specific page in the
+                result set that should be returned.
+            order (str, optional): Method of response items sorting. Default
+                value is "time". Acceptable values are:
+                - time – Comment threads are ordered by time.
+                - relevance – Comment threads are ordered by relevance.
+            text_format (str, optional): Type of format response items.
+                Default value is "plainText". Acceptable values are:
+                - plainText – Returns the comments in plain text format.
+                - html – Returns the comments text in HTML format.
+            search_text (str, optional): Filtering response comment by text.
+
+        """
+        params = {
+            'key': key,
+            'part': ','.join(part),
+            'videoId': video_id,
+            'maxResults': max_results,
+            'order': order,
+            'textFormat': text_format,
+        }
+
+        if search_text:
+            params['searchTerms'] = search_text
+        if page_token:
+            params['pageToken'] = page_token
+
+        return await self._request(kwargs.get('name'), params=params)

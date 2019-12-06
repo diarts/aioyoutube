@@ -79,3 +79,24 @@ def response_error_handler(coroutine):
         return json
 
     return wrapper
+
+
+def comments_error_handler(coroutine):
+    async def wrapper(*args, **kwargs):
+        """Decorator checker api comments response."""
+
+        json = await coroutine(*args, **kwargs)
+
+        if json.get('error'):
+            reason = json['error']['errors'][0]['reason']
+
+            if json['error']['code'] == 404:
+                if reason == 'videoNotFound':
+                    video_id = kwargs.get('video_id')
+                    raise InvalidVideoId(code=404, mess=(
+                        f"Video with passed id:{video_id} doesn't exist."
+                    ))
+
+        return json
+
+    return wrapper
