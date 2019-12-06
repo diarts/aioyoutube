@@ -124,3 +124,24 @@ def channels_error_handler(coroutine):
         return json
 
     return wrapper
+
+
+def playlist_items_error_handler(coroutine):
+    async def wrapper(*args, **kwargs):
+        """Decorator checker api playlist items response."""
+
+        json = await coroutine(*args, **kwargs)
+
+        if json.get('error'):
+            reason = json['error']['errors'][0]['reason']
+
+            if json['error']['code'] == 404:
+                if reason == 'playlistNotFound':
+                    raise InvalidPlaylistId(code=404, mess=(
+                        f"Playlist with id {kwargs.get('playlist_id')} "
+                        "doesn't exist."
+                    ))
+
+        return json
+
+    return wrapper

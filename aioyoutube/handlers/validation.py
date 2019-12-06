@@ -233,3 +233,62 @@ def channels_validation(coroutine):
         return await coroutine(*args, **kwargs)
 
     return wrapper
+
+
+def playlist_items_validation(coroutine):
+    async def wrapper(*args, **kwargs):
+        """Decorator validate passed parameters for api method getting
+            playlist items data."""
+        acceptable_part = (
+            'contentDetails', 'id', 'snippet', 'status',
+        )
+
+        key = kwargs.get('key')
+        part = kwargs.get('part')
+        max_results = kwargs.get('max_results')
+        playlist_id = kwargs.get('playlist_id')
+        page_token = kwargs.get('page_token')
+
+        if key and not isinstance(key, str):
+            raise VariableTypeError(
+                f'Argument "key" must be an str, current type is {type(key)}.'
+            )
+        elif part and not isinstance(part, list):
+            raise VariableTypeError(
+                'Argument "part" must be an list, current type is'
+                f' {type(max_results)}.'
+            )
+        elif part and not all(isinstance(item, str) for item in part):
+            raise VariableTypeError(
+                'Argument "part" must contain only str, current type is'
+                f' {type(max_results)}.'
+            )
+        elif part and not all(item in acceptable_part for item in part):
+            raise VariableValueError(
+                'Acceptable values for part contain parameter is '
+                f'{acceptable_part}, current part contain {part}.'
+            )
+        elif max_results and not isinstance(max_results, int):
+            raise VariableTypeError(
+                'Argument "max_results" must be an int, current type is'
+                f' {type(max_results)}.'
+            )
+        elif max_results and not 0 <= max_results <= 50:
+            raise VariableValueError(
+                'Argument "max_result" must be in range from 1 to 50, '
+                f'current value is {max_results}.'
+            )
+        elif playlist_id and not isinstance(playlist_id, str):
+            raise VariableTypeError(
+                'Argument "playlist_id" must be an str, current type is'
+                f' {type(playlist_id)}.'
+            )
+        elif page_token and not isinstance(page_token, str):
+            raise VariableTypeError(
+                'Argument "page_token" must be an str, current type is '
+                f'{type(page_token)}.'
+            )
+
+        return await coroutine(*args, **kwargs)
+
+    return wrapper
