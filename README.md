@@ -1,14 +1,17 @@
 # Aioyoutube
--[About](#about)
--[Usage](#usage)
+- [About](#about)
+- [Usage](#usage)
 
 ## About
 Aioyoutube is a Python async wrapper for youtube.com REST API.
 
 ## Usage
-Note:`For use aioyoutube package, you must create youtube application 
+Note:
+```
+For use aioyoutube package, you must create youtube application 
 and generate API application key. You can do it 
-on [Google developers page](https://console.developers.google.com/).`
+on https://console.developers.google.com
+```
 
 ### Use api
 All description of youtube api methods you can find on
