@@ -1,0 +1,112 @@
+from aiohttp import ClientSession
+
+from aioyoutube.helpers import insert_name, time_converting
+from aioyoutube.handlers import (
+    response_error_handler,
+    search_validation,
+)
+
+__all__ = [
+    'Api',
+]
+
+
+class Api:
+    """youtube.com REST API."""
+    _API_VERSION = 3
+    _API_URL_TEMP = 'https://www.googleapis.com/youtube/v{version}/'
+
+    __slots__ = ('_session', '_api_version', '_api_url')
+
+    def __init__(self, session: ClientSession = None, version: int = None):
+        self._session = session or ClientSession
+        self._api_version = version or self._API_VERSION
+        self._api_url = self._API_URL_TEMP.format(version=self.api_version)
+
+    def __repr__(self):
+        return f'<class {self.__class__.__name__} version={self.api_version}>'
+
+    def __str__(self):
+        return f'Youtube Api v{self.api_version} requester.'
+
+    @property
+    def api_url(self) -> str:
+        return self._api_url
+
+    @property
+    def api_version(self) -> int:
+        return self._api_version
+
+    async def _request(self, method_name: str, params: dict) -> dict:
+        """Sending request and getting data from youtube api server.
+
+        Args:
+            method_name (str): Request method api name.
+            params (dict): Dict of request parameters.
+
+        """
+        url = self.api_url + method_name
+
+        async with self._session() as sess:
+            async with sess.get(url, params=params) as res:
+                return await res.json()
+
+    @search_validation
+    @response_error_handler
+    @insert_name
+    async def search(self, key: str, text: str,
+                     max_results: int = 50,
+                     page_token: str = None, published_after: int = None,
+                     published_before: int = None, order: str = 'date',
+                     search_by: str = 'video', **kwargs) -> dict:
+        """Getting result of searching in youtube service search.
+
+        Args:
+            key (str): Key of youtube application, for access to youtube api.
+            text (str): Text of searching.
+            max_results (int, optional): Count of items in response.
+                Minimal value is 1, maximum value is 50. Default value is 50.
+            page_token (str, optional): Identifies a specific page in the
+                result set that should be returned.
+            order (str, optional): Method of response items sorting. Default
+                value is "date". Acceptable values are:
+                - date – Resources are sorted in reverse chronological
+                    order based on the date they were created.
+                - rating – Resources are sorted from highest to lowest rating.
+                - relevance – Resources are sorted based on their relevance
+                    to the search query. This is the default value for
+                    this parameter.
+                - title – Resources are sorted alphabetically by title.
+                - videoCount – Channels are sorted in descending order
+                    of their number of uploaded videos.
+                - viewCount – Resources are sorted from highest to lowest
+                    number of views. For live broadcasts, videos are sorted
+                    by number of concurrent viewers while the broadcasts
+                    are ongoing.
+            published_after (int, optional): Datetime in unixtime format.
+                Response will contain items created at or after the
+                specified time. If value more then current time, this
+                parameter has been ignored.
+            published_before (int, optional): Datetime in unixtime format.
+                Response will contain items created at or before the
+                specified time.
+            search_by (str, optional): Type of api response items. Default
+                value is "video". Acceptable values: video, channel, playlist.
+
+        """
+        params = {
+            'key': key,
+            'part': 'snippet',
+            'q': text,
+            'maxResults': max_results,
+            'order': order,
+            'type': search_by,
+        }
+        if page_token:
+            params['pageToken'] = page_token
+        if published_after:
+            params['publishedAfter'] = time_converting(published_after)
+        if published_before:
+            params['publishedBefore'] = time_converting(published_before)
+
+        return await self._request(kwargs.get('name'), params)
