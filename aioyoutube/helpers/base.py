@@ -1,11 +1,12 @@
+from functools import wraps
 from rfc3339 import rfc3339
 from datetime import datetime
 
 
 def insert_name(coroutine):
-    """Decorator insert class method name into this method parameters."""
-
+    @wraps(coroutine)
     async def wrapper(*args, **kwargs):
+        """Decorator insert class method name into this method parameters."""
         return await coroutine(*args, **kwargs, name=coroutine.__name__)
 
     return wrapper

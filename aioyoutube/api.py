@@ -12,6 +12,7 @@ from aioyoutube.handlers import (
     playlist_items_error_handler,
     playlist_items_validation,
     playlists_validation,
+    playlist_error_handler,
 )
 
 __all__ = [
@@ -62,8 +63,7 @@ class Api:
     @search_validation
     @response_error_handler
     @insert_name
-    async def search(self, key: str, text: str,
-                     max_results: int = 50,
+    async def search(self, *, key: str, text: str, max_results: int = 50,
                      page_token: str = None, published_after: int = None,
                      published_before: int = None, order: str = 'date',
                      search_by: str = 'video', **kwargs) -> dict:
@@ -123,7 +123,7 @@ class Api:
     @response_error_handler
     @comments_error_handler
     @insert_name
-    async def commentThreads(self, key: str, part: List[str], video_id: str,
+    async def commentThreads(self, *, key: str, part: List[str], video_id: str,
                              max_results: int = 100, order: str = 'time',
                              text_format: str = 'plainText',
                              page_token: str = None, search_text: str = None,
@@ -170,7 +170,8 @@ class Api:
     @response_error_handler
     @channels_error_handler
     @insert_name
-    async def channels(self, key: str, part: List[str], max_results: int = 50,
+    async def channels(self, *, key: str, part: List[str],
+                       max_results: int = 50,
                        channel_id: str = None, user_name: str = None,
                        **kwargs) -> dict:
         """Getting channel data.
@@ -208,9 +209,9 @@ class Api:
     @response_error_handler
     @playlist_items_error_handler
     @insert_name
-    async def playlistItems(self, key: str, part: List[str], playlist_id: str,
-                            max_results: int = 50, page_token: str = None,
-                            **kwargs) -> dict:
+    async def playlistItems(self, *, key: str, part: List[str],
+                            playlist_id: str, max_results: int = 50,
+                            page_token: str = None, **kwargs) -> dict:
         """Getting playlist videos.
 
         Args:
@@ -237,8 +238,9 @@ class Api:
 
     @playlists_validation
     @response_error_handler
+    @playlist_error_handler
     @insert_name
-    async def playlists(self, key: str, part: List[str], channel_id: str,
+    async def playlists(self, *, key: str, part: List[str], channel_id: str,
                         max_results: int = 50, page_token: str = None,
                         **kwargs) -> dict:
         """Getting channel playlists.

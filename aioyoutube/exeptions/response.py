@@ -6,8 +6,19 @@ class ResponseApiError(YoutubeApiError):
     pass
 
 
+class ForbiddenError(ResponseApiError):
+    """Exception raises when api work only for app with OAuth2.0
+    authentication."""
+    pass
+
+
 class UnknownField(ResponseApiError):
     """Exception raises when passed parameter has wrong value."""
+    pass
+
+
+class InvalidChannelId(ResponseApiError):
+    """Exception raises when passed parameter "channelId" is invalid."""
     pass
 
 
@@ -31,12 +42,34 @@ class InvalidPlaylistId(ResponseApiError):
     pass
 
 
-class InvalidParameterValue(ResponseApiError):
-    """Exception raises when passed parameter value not allowed."""
+class CommentsDisabled(ResponseApiError):
+    """Exception raises when video comments is closed."""
     pass
 
 
-class InvalidUserName(InvalidParameterValue):
-    """Exception raises when response of api method "getting youtube
-    channel data by user name" not contains items."""
+class ChannelForbidden(ResponseApiError):
+    """Exception raises when channel doesn't support the request."""
+    pass
+
+
+class PlaylistItemsNotAccessible(ResponseApiError):
+    """Exception raises when playlist required OAuth2 authorization."""
+    pass
+
+
+class HistoryNotAccessible(ResponseApiError):
+    """Exception raises when try getting playlist "history" items. Items
+    of playlist "history" cannot be retrieved through the API."""
+    pass
+
+
+class PlaylistForbidden(ResponseApiError):
+    """Exception raises when request playlist doesn't support the request
+    or required OAuth2 authorization."""
+    pass
+
+
+class WatchLaterNotAccessible(ResponseApiError):
+    """Exception raises when try getting playlist "watch later" items. Items
+    of playlist "watch later" cannot be retrieved through the API."""
     pass
