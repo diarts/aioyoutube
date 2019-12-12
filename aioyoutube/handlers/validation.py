@@ -1,9 +1,11 @@
+from functools import wraps
 from aioyoutube.exeptions import (
     VariableTypeError, VariableValueError
 )
 
 
 def search_validation(coroutine):
+    @wraps(coroutine)
     async def wrapper(*args, **kwargs):
         """Decorator validate passed parameters for api method getting
         search result."""
@@ -83,10 +85,11 @@ def search_validation(coroutine):
     return wrapper
 
 
-def comments_validation(coroutine):
+def comment_threads_validation(coroutine):
+    @wraps(coroutine)
     async def wrapper(*args, **kwargs):
         """Decorator validate passed parameters for api method getting
-        video comments."""
+        video comment_threads."""
         acceptable_part = ('id', 'replies', 'snippet',)
         acceptable_order = ('time', 'relevance',)
         acceptable_text_format = ('plainText', 'html',)
@@ -170,7 +173,78 @@ def comments_validation(coroutine):
     return wrapper
 
 
+def comments_validation(coroutine):
+    @wraps(coroutine)
+    async def wrapper(*args, **kwargs):
+        """Decorator validate passed parameters for api method getting
+        comments from comment_threads."""
+        acceptable_part = ('id', 'snippet',)
+        acceptable_text_format = ('plainText', 'html',)
+
+        key = kwargs.get('key')
+        part = kwargs.get('part')
+        max_results = kwargs.get('max_results')
+        page_token = kwargs.get('page_token')
+        parent_id = kwargs.get('parent_id')
+        text_format = kwargs.get('text_format')
+
+        if key and not isinstance(key, str):
+            raise VariableTypeError(
+                f'Argument "key" must be an str, current type is {type(key)}.'
+            )
+        elif part and not isinstance(part, list):
+            raise VariableTypeError(
+                'Argument "part" must be an list, current type is'
+                f' {type(max_results)}.'
+            )
+        elif part and not all(isinstance(item, str) for item in part):
+            raise VariableTypeError(
+                'Argument "part" must contain only str, current type is'
+                f' {type(max_results)}.'
+            )
+        elif part and not all(item in acceptable_part for item in part):
+            raise VariableValueError(
+                'Acceptable values for part contain parameter is '
+                f'{acceptable_part}, current part contain {part}.'
+            )
+        elif max_results and not isinstance(max_results, int):
+            raise VariableTypeError(
+                'Argument "max_results" must be an int, current type is'
+                f' {type(max_results)}.'
+            )
+        elif max_results and not 0 <= max_results <= 100:
+            raise VariableValueError(
+                'Argument "max_result" must be in range from 1 to 100, '
+                f'current value is {max_results}.'
+            )
+        elif page_token and not isinstance(page_token, str):
+            raise VariableTypeError(
+                'Argument "page_token" must be an str, current type is '
+                f'{type(page_token)}.'
+            )
+        elif text_format and not isinstance(text_format, str):
+            raise VariableTypeError(
+                'Argument "text_format" must be an str, current type is'
+                f' {type(text_format)}.'
+            )
+        elif text_format and text_format not in acceptable_text_format:
+            raise VariableValueError(
+                'Acceptable values for argument "order" is '
+                f'{acceptable_text_format}, current value is {text_format}.'
+            )
+        elif parent_id and not isinstance(parent_id, str):
+            raise VariableTypeError(
+                'Argument "parent_id" must be an str, current type is'
+                f' {type(text_format)}.'
+            )
+
+        return await coroutine(*args, **kwargs)
+
+    return wrapper
+
+
 def channels_validation(coroutine):
+    @wraps(coroutine)
     async def wrapper(*args, **kwargs):
         """Decorator validate passed parameters for api method getting
             channels data."""
@@ -236,6 +310,7 @@ def channels_validation(coroutine):
 
 
 def playlist_items_validation(coroutine):
+    @wraps(coroutine)
     async def wrapper(*args, **kwargs):
         """Decorator validate passed parameters for api method getting
             playlist items data."""
@@ -295,6 +370,7 @@ def playlist_items_validation(coroutine):
 
 
 def playlists_validation(coroutine):
+    @wraps(coroutine)
     async def wrapper(*args, **kwargs):
         """Decorator validate passed parameters for api method getting
             playlists data."""

@@ -98,7 +98,7 @@ def response_error_handler(coroutine):
     return wrapper
 
 
-def comments_error_handler(coroutine):
+def comment_threads_error_handler(coroutine):
     @wraps(coroutine)
     async def wrapper(*args, **kwargs):
         """Decorator checker api comments response."""
@@ -118,6 +118,28 @@ def comments_error_handler(coroutine):
                 if reason == 'commentsDisabled':
                     raise CommentsDisabled(code=403, json=json, mess=(
                         f'Comments for video: {video_id}, is disabled.'
+                    ))
+
+        return json
+
+    return wrapper
+
+
+def comments_error_handler(coroutine):
+    @wraps(coroutine)
+    async def wrapper(*args, **kwargs):
+        """Decorator checker api comments response."""
+        parent_id = kwargs.get('parentId')
+
+        json = await coroutine(*args, **kwargs)
+
+        if json.get('error'):
+            reason = json['error']['errors'][0]['reason']
+
+            if json['error']['code'] == 404:
+                if reason == 'commentNotFound':
+                    raise InvalidCommentThreadId(code=404, json=json, mess=(
+                        f"Comment thread with id={parent_id} doesn't exist."
                     ))
 
         return json

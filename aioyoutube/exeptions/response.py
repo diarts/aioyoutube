@@ -32,6 +32,11 @@ class InvalidVideoId(ResponseApiError):
     pass
 
 
+class InvalidCommentThreadId(ResponseApiError):
+    """Exception raises when passed parameter "parentId" is invalid."""
+    pass
+
+
 class InvalidPageToken(ResponseApiError):
     """Exception raises when passed parameter "pageToken" is invalid."""
     pass

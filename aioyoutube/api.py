@@ -5,14 +5,16 @@ from aioyoutube.helpers import insert_name, time_converting
 from aioyoutube.handlers import (
     response_error_handler,
     search_validation,
-    comments_validation,
-    comments_error_handler,
+    comment_threads_validation,
+    comment_threads_error_handler,
     channels_validation,
     channels_error_handler,
     playlist_items_error_handler,
     playlist_items_validation,
     playlists_validation,
     playlist_error_handler,
+    comments_validation,
+    comments_error_handler,
 )
 
 __all__ = [
@@ -119,16 +121,16 @@ class Api:
 
         return await self._request(kwargs.get('name'), params)
 
-    @comments_validation
+    @comment_threads_validation
     @response_error_handler
-    @comments_error_handler
+    @comment_threads_error_handler
     @insert_name
     async def commentThreads(self, *, key: str, part: List[str], video_id: str,
                              max_results: int = 100, order: str = 'time',
                              text_format: str = 'plainText',
                              page_token: str = None, search_text: str = None,
                              **kwargs) -> dict:
-        """Getting comments for video.
+        """Getting comment threads for video.
 
         Args:
             key (str): Key of youtube application, for access to youtube api.
@@ -161,6 +163,43 @@ class Api:
 
         if search_text:
             params['searchTerms'] = search_text
+        if page_token:
+            params['pageToken'] = page_token
+
+        return await self._request(kwargs.get('name'), params=params)
+
+    @comments_validation
+    @response_error_handler
+    @comments_error_handler
+    @insert_name
+    async def comments(self, *, key: str, part: List[str], parent_id: str,
+                       max_results: int = 100, text_format: str = 'plainText',
+                       page_token: str = None, **kwargs) -> dict:
+        """Getting comments for comment thread.
+
+        Args:
+            key (str): Key of youtube application, for access to youtube api.
+            part (List[str]): Sections list which must contained in response.
+                Acceptable part sections: id, replies, snippet.
+            parent_id (str): Id of parent comment thread.
+            max_results (int, optional): Count of items in response.
+                Minimal value is 1, maximum value is 100. Default value is 100.
+            page_token (str, optional): Identifies a specific page in the
+                result set that should be returned.
+            text_format (str, optional): Type of format response items.
+                Default value is "plainText". Acceptable values are:
+                - plainText – Returns the comments in plain text format.
+                - html – Returns the comments text in HTML format.
+
+        """
+        params = {
+            'key': key,
+            'part': ','.join(part),
+            'parentId': parent_id,
+            'maxResults': max_results,
+            'textFormat': text_format,
+        }
+
         if page_token:
             params['pageToken'] = page_token
 
