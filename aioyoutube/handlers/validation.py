@@ -110,12 +110,11 @@ def comment_threads_validation(coroutine):
         elif part and not isinstance(part, list):
             raise VariableTypeError(
                 'Argument "part" must be an list, current type is'
-                f' {type(max_results)}.'
+                f' {type(part)}.'
             )
         elif part and not all(isinstance(item, str) for item in part):
             raise VariableTypeError(
-                'Argument "part" must contain only str, current type is'
-                f' {type(max_results)}.'
+                'Argument "part" must contain only str.'
             )
         elif part and not all(item in acceptable_part for item in part):
             raise VariableValueError(
@@ -195,12 +194,11 @@ def comments_validation(coroutine):
         elif part and not isinstance(part, list):
             raise VariableTypeError(
                 'Argument "part" must be an list, current type is'
-                f' {type(max_results)}.'
+                f' {type(part)}.'
             )
         elif part and not all(isinstance(item, str) for item in part):
             raise VariableTypeError(
-                'Argument "part" must contain only str, current type is'
-                f' {type(max_results)}.'
+                'Argument "part" must contain only str.'
             )
         elif part and not all(item in acceptable_part for item in part):
             raise VariableValueError(
@@ -235,7 +233,7 @@ def comments_validation(coroutine):
         elif parent_id and not isinstance(parent_id, str):
             raise VariableTypeError(
                 'Argument "parent_id" must be an str, current type is'
-                f' {type(text_format)}.'
+                f' {type(parent_id)}.'
             )
 
         return await coroutine(*args, **kwargs)
@@ -266,12 +264,11 @@ def channels_validation(coroutine):
         elif part and not isinstance(part, list):
             raise VariableTypeError(
                 'Argument "part" must be an list, current type is'
-                f' {type(max_results)}.'
+                f' {type(part)}.'
             )
         elif part and not all(isinstance(item, str) for item in part):
             raise VariableTypeError(
-                'Argument "part" must contain only str, current type is'
-                f' {type(max_results)}.'
+                'Argument "part" must contain only str.'
             )
         elif part and not all(item in acceptable_part for item in part):
             raise VariableValueError(
@@ -331,12 +328,11 @@ def playlist_items_validation(coroutine):
         elif part and not isinstance(part, list):
             raise VariableTypeError(
                 'Argument "part" must be an list, current type is'
-                f' {type(max_results)}.'
+                f' {type(part)}.'
             )
         elif part and not all(isinstance(item, str) for item in part):
             raise VariableTypeError(
-                'Argument "part" must contain only str, current type is'
-                f' {type(max_results)}.'
+                'Argument "part" must contain only str.'
             )
         elif part and not all(item in acceptable_part for item in part):
             raise VariableValueError(
@@ -392,12 +388,11 @@ def playlists_validation(coroutine):
         elif part and not isinstance(part, list):
             raise VariableTypeError(
                 'Argument "part" must be an list, current type is'
-                f' {type(max_results)}.'
+                f' {type(part)}.'
             )
         elif part and not all(isinstance(item, str) for item in part):
             raise VariableTypeError(
-                'Argument "part" must contain only str, current type is'
-                f' {type(max_results)}.'
+                'Argument "part" must contain only str.'
             )
         elif part and not all(item in acceptable_part for item in part):
             raise VariableValueError(
@@ -418,6 +413,71 @@ def playlists_validation(coroutine):
             raise VariableTypeError(
                 'Argument "channel_id" must be an str, current type is'
                 f' {type(channel_id)}.'
+            )
+        elif page_token and not isinstance(page_token, str):
+            raise VariableTypeError(
+                'Argument "page_token" must be an str, current type is '
+                f'{type(page_token)}.'
+            )
+
+        return await coroutine(*args, **kwargs)
+
+    return wrapper
+
+
+def videos_validation(coroutine):
+    @wraps(coroutine)
+    async def wrapper(*args, **kwargs):
+        """Decorator validate passed parameters for api method getting
+            video data."""
+        acceptable_part = (
+            'contentDetails', 'id', 'liveStreamingDetails', 'localizations',
+            'player', 'recordingDetails', 'snippet', 'statistics',
+            'status', 'topicDetails',
+        )
+
+        key = kwargs.get('key')
+        part = kwargs.get('part')
+        max_results = kwargs.get('max_results')
+        video_ids = kwargs.get('video_ids')
+        page_token = kwargs.get('page_token')
+
+        if key and not isinstance(key, str):
+            raise VariableTypeError(
+                f'Argument "key" must be an str, current type is {type(key)}.'
+            )
+        elif part and not isinstance(part, list):
+            raise VariableTypeError(
+                'Argument "part" must be an list, current type is'
+                f' {type(part)}.'
+            )
+        elif part and not all(isinstance(item, str) for item in part):
+            raise VariableTypeError(
+                'Argument "part" must contain only str.'
+            )
+        elif part and not all(item in acceptable_part for item in part):
+            raise VariableValueError(
+                'Acceptable values for part contain parameter is '
+                f'{acceptable_part}, current part contain {part}.'
+            )
+        elif max_results and not isinstance(max_results, int):
+            raise VariableTypeError(
+                'Argument "max_results" must be an int, current type is'
+                f' {type(max_results)}.'
+            )
+        elif max_results and not 0 <= max_results <= 50:
+            raise VariableValueError(
+                'Argument "max_result" must be in range from 1 to 50, '
+                f'current value is {max_results}.'
+            )
+        elif video_ids and not isinstance(video_ids, list):
+            raise VariableTypeError(
+                'Argument "video_ids" must be an list, current type is'
+                f' {type(video_ids)}.'
+            )
+        elif video_ids and not all(isinstance(item, str) for item in video_ids):
+            raise VariableTypeError(
+                'Argument "video_ids" must contain only str.'
             )
         elif page_token and not isinstance(page_token, str):
             raise VariableTypeError(

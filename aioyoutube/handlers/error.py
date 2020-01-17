@@ -92,6 +92,11 @@ def response_error_handler(coroutine):
                     raise InvalidOwnerAccount(code=404, json=json, mess=(
                         f"Owner account not found."
                     ))
+                elif reason == 'videoNotFound':
+                    raise InvalidVideoId(code=404, json=json, mess=(
+                        f"Video with passed id:{kwargs.get('id')} "
+                        "doesn't exist."
+                    ))
 
         return json
 
@@ -109,12 +114,7 @@ def comment_threads_error_handler(coroutine):
         if json.get('error'):
             reason = json['error']['errors'][0]['reason']
 
-            if json['error']['code'] == 404:
-                if reason == 'videoNotFound':
-                    raise InvalidVideoId(code=404, json=json, mess=(
-                        f"Video with passed id:{video_id} doesn't exist."
-                    ))
-            elif json['error']['code'] == 403:
+            if json['error']['code'] == 403:
                 if reason == 'commentsDisabled':
                     raise CommentsDisabled(code=403, json=json, mess=(
                         f'Comments for video: {video_id}, is disabled.'

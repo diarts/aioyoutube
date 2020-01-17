@@ -15,6 +15,7 @@ from aioyoutube.handlers import (
     playlist_error_handler,
     comments_validation,
     comments_error_handler,
+    videos_validation,
 )
 
 __all__ = [
@@ -301,6 +302,38 @@ class Api:
             'key': key,
             'part': ','.join(part),
             'channelId': channel_id,
+            'maxResults': max_results,
+        }
+        if page_token:
+            params['pageToken'] = page_token
+
+        return await self._request(kwargs.get('name'), params=params)
+
+    @videos_validation
+    @response_error_handler
+    @insert_name
+    async def videos(self, *, key: str, part: List[str], video_ids: List[str],
+                     max_results: int = 50, page_token: str = None,
+                     **kwargs):
+        """Getting videos by id.
+
+        Args:
+            key (str): Key of youtube application, for access to youtube api.
+            part (List[str]): Sections list which must contained in response.
+                Acceptable part sections: contentDetails, id,
+                liveStreamingDetails, localizations, player, recordingDetails,
+                snippet, statistics, status, topicDetails.
+            video_ids (List[str]): list of youtube video ids.
+            max_results (int, optional): Count of items in response.
+                Minimal value is 1, maximum value is 50. Default value is 50.
+            page_token (str, optional): Identifies a specific page in the
+                result set that should be returned.
+
+        """
+        params = {
+            'key': key,
+            'id': ','.join(video_ids),
+            'part': ','.join(part),
             'maxResults': max_results,
         }
         if page_token:

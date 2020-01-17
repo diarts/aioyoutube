@@ -5,7 +5,7 @@ with open("README.md", "r") as fh:
 
 setup(
     name='aioyoutube',
-    version='0.1.2',
+    version='0.1.3',
     packages=['aioyoutube', 'aioyoutube.helpers', 'aioyoutube.handlers',
               'aioyoutube.exeptions'],
     url='https://github.com/diarts/aioyoutube.git',

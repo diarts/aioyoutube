@@ -25,10 +25,12 @@ All api method names in package match with youtube api method names.
 
 Currently implemented methods: 
 - search
+- comments
 - commentThreads
 - channels
 - playlistItems
 - playlists
+- videos
 
 Exapmple using youtube api method "search":
 ```python
