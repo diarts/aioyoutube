@@ -156,7 +156,7 @@ def channels_error_handler(coroutine):
 
         json = await coroutine(*args, **kwargs)
 
-        if not json.get('items'):
+        if not json.get('items') and not json.get('error'):
             if user_name:
                 raise InvalidUserName(json=json, mess=(
                     f"Channel with user name {user_name} doesn't exist."
@@ -166,7 +166,7 @@ def channels_error_handler(coroutine):
                     f"Channel with id {channel_id} doesn't exist."
                 ))
 
-        if json.get('error'):
+        elif json.get('error'):
             reason = json['error']['errors'][0]['reason']
 
             if json['error']['code'] == 400:
