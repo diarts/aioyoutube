@@ -18,11 +18,13 @@ def response_error_handler(coroutine):
                 f'into request url.'
             ))
 
-        if json.get('error'):
+        try:
             reason = json['error']['errors'][0]['reason']
             message = json['error']['message']
             code = json['error']['code']
-
+        except KeyError:
+            return json
+        else:
             if code == 400:
                 if reason == 'keyInvalid':
                     key = kwargs.get('key')
@@ -64,7 +66,8 @@ def response_error_handler(coroutine):
                     ))
 
             elif code == 403:
-                if reason in ('dailyLimitExceededUnreg', 'quotaExceeded'):
+                if reason in ('dailyLimitExceededUnreg', 'quotaExceeded',
+                              'dailyLimitExceeded',):
                     raise ExceededDailyLimit(code=403, json=json, mess=(
                         f'Day request limit for api key {kwargs.get("key")} '
                         'was exceeded.'
@@ -97,8 +100,6 @@ def response_error_handler(coroutine):
                         f"Video with passed id:{kwargs.get('id')} "
                         "doesn't exist."
                     ))
-
-        return json
 
     return wrapper
 
